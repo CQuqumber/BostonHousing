@@ -16,7 +16,7 @@ class Node(object):
 
 		for n in self.inbound_nodes:
 			n.outbound_nodes.append(self)
-		
+
 	def forward(self):
         #  Forward propagation.
         #  Compute the output value based on `inbound_nodes` and
@@ -37,10 +37,10 @@ class Input(Node):
 	#  self.inbound_nodes
 	#  val = self.inbound_nodes[0].value
 
-	def forward(self, value = None):
+	def forward(self):
 		#  Overwrite the value if one is passed in.
-		if value is not None:
-			self.value = value
+		pass
+
 
 class Linear(Node):	#  Perform a caculation
 	def __init__(self, inputs, weights, bias):
@@ -58,6 +58,21 @@ class Linear(Node):	#  Perform a caculation
 		for x, w, in zip(inputs, weights):
 			self.value += x * w
 		'''
+
+class Sigmoid(Node):
+	"""docstring for Sigmoid"""
+	def __init__(self, node):
+		Node.__init__(self, [node])
+
+
+	def _sigmoid(self, x):
+		return 1. / (1. + np.exp(-x))
+
+
+	def forward(self):
+		input_value = self.inbound_nodes[0].value
+		self.value = self._sigmoid(input_value)
+
 
 
 
@@ -108,13 +123,10 @@ def topological_sort(feed_dict):
 def forward_pass(output_node, sorted_nodes):
 	'''
 	Performance a forward pass through a list of sorted nodes.
-
 	Arguments:
-
 		'output_node': A node in the graph, should be the output node
 											(have no outgoing edges).
 		'sorted_nodes': A topologically sorted list of nodes.
-
 	Return the output Nodes value
 	'''
 	for n in sorted_nodes:
