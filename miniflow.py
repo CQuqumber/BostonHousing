@@ -25,6 +25,10 @@ class Node(object):
 		raise NotImplemented
 
 
+	def backward(self):
+		raise NotImplemented
+
+
 class Input(Node):
 	def __init__(self):
 		#  Input node has no inbound nodes,
@@ -42,6 +46,19 @@ class Input(Node):
 		pass
 
 
+	def backward(self):
+		#  An input node has no inputs so the gradient is 0
+		#  The key, 'self', is reference to this object.
+		self.gradient = {self: 0}
+
+		#  Weights and bias may be inputs, so need to sum
+		#  the gradient from output gradients.
+		for n in self.outbound_nodes:
+			grad_cost = n.gradients[self]
+			self.gradients[self] += grad_cost * 1
+
+
+
 class Linear(Node):	#  Perform a caculation
 	def __init__(self, inputs, weights, bias):
 		Node.__init__(self, [inputs, weights, bias])
@@ -53,11 +70,18 @@ class Linear(Node):	#  Perform a caculation
 		weights = self.inbound_nodes[1].value
 		bias = self.inbound_nodes[2].value
 		self.value = np.dot(inputs, weights) + bias
-		'''
-		self.value = bias
-		for x, w, in zip(inputs, weights):
-			self.value += x * w
-		'''
+
+	def backward(self):
+		self.gradients = {n: np.zeros_like(n.value) for n in self.input_nodes}
+		#  Cycle through the outputs. The gradient will change depending
+		#  on each output, so the gradients are summed over all outputs.
+		for n in self.outbound_nodes:
+			grad_cost = n.gradients[self]
+			self.gradients[self.inbound_nodes[0]] += np.dot(grad_cost, self.inbound_nodes[1].value.T)
+
+			self.gradients[self.inbound_nodes[1]] += np.dot(self.inbound_nodes[0].value.T, grad_cost)
+
+			self.gradients[self.inbound_nodes[2]] += np.sum(grad_cost, axis=0, keepdims = False)
 
 class Sigmoid(Node):
 	"""docstring for Sigmoid"""
@@ -74,6 +98,33 @@ class Sigmoid(Node):
 		self.value = self._sigmoid(input_value)
 
 
+	def backward(self):
+		self.gradients = {n: np.zeros_like(n.value) for n in self.inbound_nodes}
+
+		for n in self.outbound_nodes:
+			grad_cost = n.gradients[self]
+			sigmoid = self.value
+			self.gradients[self.inbound_nodes[0]] += sigmoid* (1 - sigmoid) * grad_cost
+
+
+
+class MSE(Node):
+	"""docstring for MSE"""
+	def __init__(self, y, a):
+		Node.__init__(self,[y, a])
+
+	def forward(self):
+		#  Calculate the mean squared error
+		y = self.input_nodes[0].value.reshape(-1, 1)
+		a = self.input_nodes[1].value.reshape(-1, 1)
+
+		self.m = self.inbound_nodes[0].value.shape[0]
+		self.diff = y - a
+		self.value = np.mean(self.diff**2)
+
+	def backward(self):
+		self.gradients[self.inbound_nodes[0]] = (2/self.m) * self.diff
+		self.gradients[self.inbound_nodes[1]] = (-2/self.m) * self.diff
 
 
 def topological_sort(feed_dict):

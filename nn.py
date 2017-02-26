@@ -14,12 +14,16 @@ inputs, weights, bias  = Input(), Input(), Input()
 #  sorted_nodes = topological_sort(feed_dict)
 #  output = forward_pass(f, sorted_nodes)
 
-f = Linear(inputs, weights, bias)
-g = Sigmoid(f)
+X, y = Input(), Input()
+W1, b1 = Input(), Input()
+W2, b2 = Input(), Input()
 
-ip = np.array([[-1., -2.], [-1, -2]])
-w = np.array([[2., -3], [2., -3]])
-b = np.array([-3., -5])
+l1 = Linear(X, W1, b1) # First layer L-combination
+s = Sigmoid(l1) # Filter
+
+l2 = Linear(inputs, weights, bias)	# Sec Layer combination
+cost = MSE(l2, y)
+
 
 feed_dict = {inputs: ip, weights: w, bias: b}
 
