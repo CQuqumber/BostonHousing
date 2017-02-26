@@ -19,6 +19,7 @@ The project from the Deep Learning Nanodegree in
 - Stochastic gradient descent
 - Mean squared error
 - Numpy Library
+- Trainging set/ Testing set/ Validating set
 
 ## Tutorial
 - Model: Neural Network
@@ -31,6 +32,7 @@ The project from the Deep Learning Nanodegree in
 - Tensorflow Library docs.
 - Sklearn Libraryd docs.
 - Numpy Library docs.
+- [MiniFlow Database](http://yann.lecun.com/exdb/mnist/)
 
 ## Copyright and License
 
