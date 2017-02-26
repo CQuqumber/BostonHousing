@@ -1,9 +1,7 @@
 ## Predict prices of Boston housing
 
 The project from the Deep Learning Nanodegree in
-[Udacity](https://www.udacity.com/nanodegree).
-
-[Boston Housing dataset](https://archive.ics.uci.edu/ml/datasets/Housing).
+[Udacity](https://www.udacity.com/nanodegree) of [Boston Housing dataset](https://archive.ics.uci.edu/ml/datasets/Housing).
 
 
 ## Table of contents
