@@ -1,6 +1,6 @@
 import numpy as np
 
-class Node(object):
+class Node:
 	"""docstring for Node"""
 	def __init__(self, inbound_nodes=[]):
 		#  Nodes from which this node receives values
@@ -14,7 +14,9 @@ class Node(object):
 		self.value = None
 		#  Add this node as an outbound node on it's inputs.
 
-		for n in self.inbound_nodes:
+		self.gradients = {}
+
+		for n in inbound_nodes:
 			n.outbound_nodes.append(self)
 
 	def forward(self):
@@ -49,13 +51,12 @@ class Input(Node):
 	def backward(self):
 		#  An input node has no inputs so the gradient is 0
 		#  The key, 'self', is reference to this object.
-		self.gradient = {self: 0}
+		self.gradients = {self: 0}
 
 		#  Weights and bias may be inputs, so need to sum
 		#  the gradient from output gradients.
 		for n in self.outbound_nodes:
-			grad_cost = n.gradients[self]
-			self.gradients[self] += grad_cost * 1
+			self.gradients[self] += n.gradients[self]
 
 
 
@@ -72,7 +73,7 @@ class Linear(Node):	#  Perform a caculation
 		self.value = np.dot(inputs, weights) + bias
 
 	def backward(self):
-		self.gradients = {n: np.zeros_like(n.value) for n in self.input_nodes}
+		self.gradients = {n: np.zeros_like(n.value) for n in self.inbound_nodes}
 		#  Cycle through the outputs. The gradient will change depending
 		#  on each output, so the gradients are summed over all outputs.
 		for n in self.outbound_nodes:
@@ -115,8 +116,8 @@ class MSE(Node):
 
 	def forward(self):
 		#  Calculate the mean squared error
-		y = self.input_nodes[0].value.reshape(-1, 1)
-		a = self.input_nodes[1].value.reshape(-1, 1)
+		y = self.inbound_nodes[0].value.reshape(-1, 1)
+		a = self.inbound_nodes[1].value.reshape(-1, 1)
 
 		self.m = self.inbound_nodes[0].value.shape[0]
 		self.diff = y - a
@@ -187,6 +188,22 @@ def forward_pass(output_node, sorted_nodes):
 
 
 
+def forward_and_backward(graph):
+	
+	#  Forward pass
+	for n in graph:
+		n.forward()
+
+	#  Backward pass
+	for n in graph[::-1]:
+		n.backward()
+
+
+def sgd_update(trainables, learning_rate = 0.01):
+	for t in trainables:
+
+		partial = t.gradients[t]
+		t.value -= learning_rate * partial
 
 
 
