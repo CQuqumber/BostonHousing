@@ -1,3 +1,5 @@
+import numpy as np
+
 class Node(object):
 	"""docstring for Node"""
 	def __init__(self, inbound_nodes=[]):
@@ -16,9 +18,7 @@ class Node(object):
 			n.outbound_nodes.append(self)
 		
 	def forward(self):
-        
         #  Forward propagation.
-
         #  Compute the output value based on `inbound_nodes` and
         #  store the result in self.value.
 
@@ -42,16 +42,22 @@ class Input(Node):
 		if value is not None:
 			self.value = value
 
-class Add(Node):	#  Perform a caculation
-	def __init__(self, x, y):
-		Node.__init__(self, [x, y])
+class Linear(Node):	#  Perform a caculation
+	def __init__(self, inputs, weights, bias):
+		Node.__init__(self, [inputs, weights, bias])
 		#  You should access 'x' and 'y' in forward with
 		#  self.inbound_nodes[0]('x') and self.inbound_nodes[1] ('y')
 
 	def forward(self):
-		X_value = self.inbound_nodes[0].value
-		Y_value = self.inbound_nodes[1].value
-		self.value = X_value + Y_value
+		inputs = self.inbound_nodes[0].value
+		weights = self.inbound_nodes[1].value
+		bias = self.inbound_nodes[2].value
+		self.value = np.dot(inputs, weights) + bias
+		'''
+		self.value = bias
+		for x, w, in zip(inputs, weights):
+			self.value += x * w
+		'''
 
 
 

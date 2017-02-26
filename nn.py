@@ -5,17 +5,28 @@ This script builds and runs a graph with miniflow.
 """
 
 from miniflow import *
+import numpy as np
 
-x, y = Input(), Input()
+inputs, weights, bias  = Input(), Input(), Input()
 
-f = Add(x,y)
+#  f = Add(x,y)
+#  feed_dict = {x: 10, y: 5}
+#  sorted_nodes = topological_sort(feed_dict)
+#  output = forward_pass(f, sorted_nodes)
 
-feed_dict = {x: 10, y: 5}
+f = Linear(inputs, weights, bias)
 
-sorted_nodes = topological_sort(feed_dict)
-output = forward_pass(f, sorted_nodes)
+ip = np.array([[-1., -2.], [-1, -2]])
+w = np.array([[2., -3], [2., -3]])
+b = np.array([-3., -5])
+
+feed_dict = {inputs: ip, weights: w, bias: b}
+
+graph = topological_sort(feed_dict)
+output = forward_pass(f, graph)
+
+#print(graph)
+print(output)
 
 
-# NOTE: because topological_sort set the values for the `Input` nodes we could also access
-# the value for x with x.value (same goes for y).
-print("{} + {} = {} (via miniflow)".format(feed_dict[x], feed_dict[y], output))
+
